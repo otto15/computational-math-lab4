@@ -26,6 +26,12 @@
     </div>
     <div class="buttons-container">
       <button @click="addPoint" :disabled="points.length >= 12" class="add-btn">Add Point</button>
+      <div class="file-upload">
+        <label for="upload" class="custom-file-upload">
+          <i class="fa fa-cloud-upload"></i> Choose File
+        </label>
+        <input id="upload" type="file" ref="fileInput" @click="resetImageUploader" @change="handleFileUpload"/>
+      </div>
       <button @click="sendPoints" :disabled="!isValid || points.length < 8 || points.length > 12" class="send-btn">
         Approximate
       </button>
@@ -95,7 +101,22 @@ export default {
           yInput.focus();
         }
       });
-    }
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const lines = reader.result.trim().split('\n');
+        this.points = lines.map(line => {
+          const [x, y] = line.trim().split(/\s+/);
+          return {x: Number(x), y: Number(y)};
+        });
+      };
+      reader.readAsText(file);
+    },
+    resetImageUploader() {
+      this.$refs.fileInput.value = '';
+    },
   },
 };
 </script>
@@ -163,7 +184,9 @@ export default {
 
 .add-btn,
 .send-btn,
+.custom-file-upload,
 .remove-btn {
+
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.25rem;
@@ -216,5 +239,24 @@ input::-webkit-inner-spin-button {
   /* display: none; <- Crashes Chrome on hover */
   -webkit-appearance: none;
   margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  font-family: Arial, sans-serif;
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #eca637;
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+}
+
+.custom-file-upload:hover {
+  background-color: #ec9914;
 }
 </style>
